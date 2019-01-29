@@ -1,0 +1,37 @@
+# FOG LXD Build Notes
+#############################################################################
+# Create FOG Server LXD Profile
+lxc profile copy default fog
+lxc profile set fog security.privileged true
+lxc profile set fog raw.apparmor "mount fstype=nfs*, mount fstype=rpc_pipefs,"
+lxc profile show fog
+
+#############################################################################
+# Launch LXD Container and exec into server
+lxc launch images:centos/7/amd64 fog -p fog
+lxc exec fog bash
+
+#############################################################################
+# Install Fog Server
+
+# Update && Install Packages
+yum update -y && yum install -y git vim bc curl gcc gcc-c++ genisoimage gzip httpd lftp m4 make mod_ssl mtools mysql mysql-server net-tools nfs-utils php php-bcmath php-cli php-common php-fpm php-gd php-ldap php-mbstring php-mysqlnd php-process syslinux tar tftp-server unzip vsftpd wget xinetd xz-devel
+
+# Clone FOG Project + Install Script
+git clone https://github.com/FOGProject/fogproject.git ~/fogproject
+
+# Execute FOG Install Script
+cd /root/fogproject/bin/ && ./installfog.sh
+
+#############################################################################
+# REFRENCE
+# 
+# # Show install flag help menu
+# #    ./installfog.sh --help
+# 
+# # Backup Database pre/post upgrade(s)
+# #    mysqldump --allow-keywords -x -v fog > fogbackup.sql
+# 
+# # DHCP Configuration templates
+# #    https://wiki.fogproject.org/wiki/index.php/Modifying_existing_DHCP_server_to_work_with_FOG
+# #    https://wiki.fogproject.org/wiki/index.php?title=Other_DHCP_Configurations
